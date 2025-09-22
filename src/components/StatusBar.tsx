@@ -1,8 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronUpIcon, ChevronDownIcon, XIcon } from 'lucide-react';
-import { logsAtom, isExpandedAtom, toggleExpandedAtom, clearLogsAtom } from "@/lib/logAtoms";
+import { XIcon } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useAtomValue, useSetAtom } from "jotai";
+import { logsAtom, isExpandedAtom, toggleExpandedAtom, LogEntry } from "@/lib/store";
 
 export function StatusBar() {
   const logs = useAtomValue(logsAtom);
@@ -33,13 +33,11 @@ export function StatusBar() {
               </div>
               <div className="flex items-center gap-2">
                 <Button
-                  variant="ghost"
+                  variant="link"
                   size="sm"
                   onClick={toggleExpanded}
-                  className="text-gray-300 hover:text-white hover:bg-gray-800 inline-flex items-center gap-1 h-7 px-2"
                 >
                   <span className="text-xs">Details</span>
-                  <ChevronUpIcon className="w-3 h-3" />
                 </Button>
               </div>
             </div>
@@ -64,7 +62,6 @@ export function StatusBar() {
 function LogViewer() {
   const logs = useAtomValue(logsAtom);
   const toggleExpanded = useSetAtom(toggleExpandedAtom);
-  const clearLogs = useSetAtom(clearLogsAtom);
 
   const getLevelColor = (level: string) => {
     switch (level.toLowerCase()) {

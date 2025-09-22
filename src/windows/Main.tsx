@@ -2,9 +2,7 @@ import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useSettings } from "../lib/query";
-import { clearLogsAtom, useLogEventListener } from "@/lib/logAtoms";
 import { StatusBar } from "@/components/StatusBar";
-import { useSetAtom } from "jotai";
 
 import { Loader2Icon, PlusIcon } from 'lucide-react'
 import { Button } from "@/components/ui/button";
@@ -33,11 +31,7 @@ export function MainWindow() {
   const [isConverting, setIsConverting] = useState(false);
 
   const { data: settings, isLoading: settingsLoading } = useSettings();
-  const clearLogs = useSetAtom(clearLogsAtom);
   const pandocPath = settings?.pandocPath || null;
-
-  // Setup event listener for conversion logs
-  useLogEventListener();
 
   const handleFileSelect = async () => {
     try {
@@ -92,7 +86,6 @@ export function MainWindow() {
     if (!selectedFile || !pandocPath) return;
 
     setIsConverting(true);
-    clearLogs(); // Clear previous logs
 
     try {
       await invoke<ConversionResult>("convert_document", {
@@ -140,7 +133,7 @@ export function MainWindow() {
         <div className="flex flex-col gap-4 items-center">
           <div onClick={_ => {
             handleFileSelect();
-          }} role="button" className="w-18 h-18 border-green-800 border-2 border-dashed flex items-center justify-center rounded-lg hover:border-green-600 transition-all duration-100">
+          }} role="button" className="w-18 h-18 border-primary border-2 border-dashed flex items-center justify-center rounded-lg hover:border-primary/80 transition-all duration-100">
             <PlusIcon />
           </div>
 

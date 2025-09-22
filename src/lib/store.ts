@@ -1,6 +1,8 @@
+import { createStore } from "jotai";
+
+export const store = createStore()
+
 import { atom } from 'jotai';
-import { useEffect } from 'react';
-import { useSetAtom } from 'jotai';
 import { listen } from "@tauri-apps/api/event";
 
 export interface LogEntry {
@@ -45,27 +47,15 @@ export const setExpandedAtom = atom(
   }
 );
 
-// Custom hook to setup event listeners with Jotai
-export const useLogEventListener = () => {
-  const addLog = useSetAtom(addLogAtom);
-
-  useEffect(() => {
-    let unlisten: (() => void) | undefined;
-
-    const setupListener = async () => {
-      try {
-        unlisten = await listen<LogEntry>("conversion_log", (event) => {
-          addLog(event.payload);
-        });
-      } catch (error) {
-        console.error("Failed to setup log event listener:", error);
-      }
-    };
-
-    setupListener();
-
-    return () => {
-      unlisten?.();
-    };
-  }, [addLog]);
+const setupGlobalLogListener = async () => {
+  try {
+    await listen<LogEntry>("conversion_log", (event) => {
+      store.set(addLogAtom, event.payload);
+    });
+  } catch (error) {
+    console.error("Failed to setup global log event listener:", error);
+  }
 };
+
+// Initialize the global listener
+setupGlobalLogListener();
