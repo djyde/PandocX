@@ -17,7 +17,9 @@ pub fn run() {
             commands::open_in_finder,
             commands::open_settings_window,
             commands::close_settings_window,
-            commands::open_main_window
+            commands::open_main_window,
+            commands::check_or_download_pandoc,
+            commands::get_pandoc_path
         ])
         .on_window_event(|window, event| {
             match event {

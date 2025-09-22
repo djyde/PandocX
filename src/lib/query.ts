@@ -38,13 +38,18 @@ export const getStore = async () => {
   }
 };
 
+export const getPandocPath = async (): Promise<string | null> => {
+  try {
+    return await invoke<string | null>("get_pandoc_path");
+  } catch (error) {
+    console.error("Error getting pandoc path:", error);
+    return null;
+  }
+};
+
 export const getSettings = async () => {
   try {
-    console.log("Getting settings...");
-    const store = await getStore();
-    console.log("Store loaded successfully");
-    const pandocPath = await store.get<string>("pandoc_path");
-    console.log("Pandoc path retrieved:", pandocPath);
+    const pandocPath = await getPandocPath();
     return {
       pandocPath: pandocPath || "",
     };
@@ -55,9 +60,7 @@ export const getSettings = async () => {
 };
 
 export const saveSettings = async (settings: { pandocPath: string }) => {
-  const store = await getStore();
-  await store.set("pandoc_path", settings.pandocPath);
-  await store.save();
+  // We no longer save pandoc path to store since it's auto-downloaded
   return settings;
 };
 
@@ -129,5 +132,36 @@ export const convertDocument = async (params: ConversionParams): Promise<Convers
 export const useConvertDocument = () => {
   return useMutation({
     mutationFn: convertDocument,
+  });
+};
+
+// Pandoc download functionality
+interface PandocDownloadResult {
+  success: boolean;
+  pandoc_path?: string;
+  error?: string;
+}
+
+export interface DownloadProgress {
+  downloaded: number;
+  total: number;
+  percentage: number;
+  status: string;
+}
+
+export const downloadPandoc = async (): Promise<PandocDownloadResult> => {
+  return await invoke<PandocDownloadResult>("check_or_download_pandoc");
+};
+
+export const useDownloadPandoc = () => {
+  return useMutation({
+    mutationFn: downloadPandoc,
+  });
+};
+
+export const usePandocPath = () => {
+  return useQuery({
+    queryKey: ["pandoc-path"],
+    queryFn: getPandocPath,
   });
 };
