@@ -12,17 +12,6 @@
   "app": {
     "windows": [
       {
-        "label": "main",
-        "title": "pandocx",
-        "width": 640,
-        "height": 480,
-        "minWidth": 640,
-        "minHeight": 480,
-        "maximizable": false,
-        "minimizable": false,
-        "center": true
-      },
-      {
         "label": "settings",
         "title": "Settings",
         "width": 600,

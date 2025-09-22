@@ -11,6 +11,7 @@
     "opener:default",
     "store:default",
     "dialog:default",
-    "shell:default"
+    "shell:default",
+    "core:window:allow-start-dragging"
   ]
 }

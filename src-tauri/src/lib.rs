@@ -1,6 +1,6 @@
 mod commands;
 
-use tauri::Manager;
+use tauri::{Manager, TitleBarStyle, WebviewUrl, WebviewWindowBuilder};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -9,6 +9,24 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
+        .setup(|app| {
+            // Create the main window programmatically with traffic lights only
+            let win_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
+                .title("") // Empty title to hide title text
+                .inner_size(640.0, 480.0)
+                .min_inner_size(640.0, 480.0)
+                .maximizable(false)
+                .minimizable(true)
+                .center();
+
+            // Set overlay title bar style for traffic lights only on macOS
+            #[cfg(target_os = "macos")]
+            let win_builder = win_builder.title_bar_style(TitleBarStyle::Overlay);
+
+            let _window = win_builder.build()?;
+
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             commands::greet,
             commands::convert_document,

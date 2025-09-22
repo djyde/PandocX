@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { XIcon } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useAtomValue, useSetAtom } from "jotai";
-import { logsAtom, isExpandedAtom, toggleExpandedAtom, LogEntry } from "@/lib/store";
+import { logsAtom, isExpandedAtom, toggleExpandedAtom } from "@/lib/store";
 
 export function StatusBar() {
   const logs = useAtomValue(logsAtom);

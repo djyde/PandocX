@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useEffect, useRef } from "react";
+import { useMemo, useState, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
@@ -6,7 +6,7 @@ import { usePandocPath, useConvertDocument } from "../lib/query";
 import { toast } from "sonner";
 import { PandocDownloadDialog } from "@/components/PandocDownloadDialog";
 
-import { ExternalLinkIcon, FileTextIcon, FolderOpenIcon, Loader2Icon, PlusIcon, SettingsIcon } from 'lucide-react'
+import { FileTextIcon, FolderOpenIcon, Loader2Icon, PlusIcon, SettingsIcon } from 'lucide-react'
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -271,8 +271,8 @@ export function MainWindow() {
       )}
 
       <div className="h-screen flex items-center justify-center">
-        <div className="fixed top-0 right-0 left-0 px-3">
-          <div className="flex items-end justify-end">
+        <div className="fixed top-0 right-0 left-0 px-3 z-50" data-tauri-drag-region>
+          <div className="flex items-end justify-end py-2" data-tauri-drag-region>
             <Button onClick={_ => {
               invoke("open_settings_window");
             }} variant="ghost" size="sm" className="hover:bg-foreground/20 hover:text-foreground">

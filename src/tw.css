@@ -225,3 +225,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* macOS titlebar styles for overlay mode */
+*[data-tauri-drag-region] {
+  app-region: drag;
+}
