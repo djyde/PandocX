@@ -35,7 +35,7 @@ jobs:
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - name: install frontend dependencies
-        run: yarn install # change this to npm, pnpm or bun depending on which one you use.
+        run: pnpm i # change this to npm, pnpm or bun depending on which one you use.
 
       - name: import Apple Developer Certificate
         # Prevents keychain from locking automatically for 3600 seconds.
