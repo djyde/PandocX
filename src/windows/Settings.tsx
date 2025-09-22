@@ -1,19 +1,70 @@
 import { useState } from "react";
-import { usePandocPath } from "../lib/query";
+import { usePandocPath, useCheckForUpdates, useDownloadAndInstallUpdate } from "../lib/query";
 import { Button } from "@/components/ui/button";
-import { Download, CheckCircle, AlertCircle } from 'lucide-react';
+import { Download, CheckCircle, AlertCircle, RefreshCw, Loader2 } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { PandocDownloadDialog } from "@/components/PandocDownloadDialog";
 import { Alert, AlertTitle } from '@/components/ui/alert';
+import { toast } from "sonner";
 
 export function SettingsWindow() {
   const [showDownloadDialog, setShowDownloadDialog] = useState(false);
   
   const { data: pandocPath, isLoading: pandocLoading, refetch } = usePandocPath();
+  const { data: updateResult, isLoading: checkingUpdates, refetch: checkForUpdates } = useCheckForUpdates();
+  const installUpdateMutation = useDownloadAndInstallUpdate();
 
   const handleDownloadSuccess = () => {
     setShowDownloadDialog(false);
     refetch(); // Refresh the pandoc path
+  };
+
+  const handleCheckForUpdates = async () => {
+    try {
+      const result = await checkForUpdates();
+      if (result.data?.shouldUpdate) {
+        toast.success(`Update available: v${result.data.manifest?.version}`, {
+          position: "top-right",
+          description: "A new version is available for download.",
+        });
+      } else {
+        toast.success("You're up to date!", {
+          position: "top-right",
+          description: "No new updates available.",
+        });
+      }
+    } catch (error) {
+      console.error("Error checking for updates:", error);
+      toast.error("Failed to check for updates", {
+        description: error instanceof Error ? error.message : "Unknown error occurred.",
+      });
+    }
+  };
+
+  const handleInstallUpdate = async () => {
+    if (!updateResult?.shouldUpdate) return;
+    
+    const toastId = toast.loading("Downloading and installing update...", {
+      position: "top-right",
+      description: "This may take a few minutes.",
+    });
+
+    installUpdateMutation.mutate(undefined, {
+      onSuccess: () => {
+        toast.dismiss(toastId);
+        toast.success("Update installed successfully!", {
+          position: "top-right",
+          description: "The application will restart to complete the update.",
+        });
+      },
+      onError: (error) => {
+        toast.dismiss(toastId);
+        toast.error("Failed to install update", {
+          position: "top-right",
+          description: error instanceof Error ? error.message : "Unknown error occurred.",
+        });
+      },
+    });
   };
 
   const getPandocStatus = () => {
@@ -87,6 +138,59 @@ export function SettingsWindow() {
                 <Download className="h-4 w-4" />
                 {pandocPath ? "Reinstall Pandoc" : "Download Pandoc"}
               </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* App Updates Section */}
+        <div className="w-full">
+          <label className="block text-sm font-medium mb-4">
+            App Updates
+          </label>
+          
+          <div className="space-y-4">
+            {/* Update status */}
+            {updateResult?.shouldUpdate && (
+              <Alert>
+                <AlertTitle className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm">
+                    Update available: v{updateResult.manifest?.version}
+                  </span>
+                </AlertTitle>
+              </Alert>
+            )}
+            
+            {/* Update buttons */}
+            <div className="flex justify-start gap-2">
+              <Button 
+                onClick={handleCheckForUpdates} 
+                variant="outline"
+                disabled={checkingUpdates}
+                className="inline-flex items-center gap-2"
+              >
+                {checkingUpdates ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                Check for Updates
+              </Button>
+              
+              {updateResult?.shouldUpdate && (
+                <Button 
+                  onClick={handleInstallUpdate}
+                  disabled={installUpdateMutation.isPending}
+                  className="inline-flex items-center gap-2"
+                >
+                  {installUpdateMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
+                  Install Update
+                </Button>
+              )}
             </div>
           </div>
         </div>

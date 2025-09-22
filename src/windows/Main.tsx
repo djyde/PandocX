@@ -2,11 +2,11 @@ import { useMemo, useState, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
-import { usePandocPath, useConvertDocument } from "../lib/query";
+import { usePandocPath, useConvertDocument, useAutoCheckForUpdates, useDownloadAndInstallUpdate } from "../lib/query";
 import { toast } from "sonner";
 import { PandocDownloadDialog } from "@/components/PandocDownloadDialog";
 
-import { FileTextIcon, FolderOpenIcon, Loader2Icon, PlusIcon, SettingsIcon } from 'lucide-react'
+import { FileTextIcon, FolderOpenIcon, Loader2Icon, PlusIcon, SettingsIcon, Download } from 'lucide-react'
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -148,6 +148,10 @@ export function MainWindow() {
 
   const { data: pandocPath, isLoading: pandocLoading, refetch: refetchPandocPath } = usePandocPath();
   const convertMutation = useConvertDocument();
+  
+  // Auto-check for updates
+  const { data: updateResult } = useAutoCheckForUpdates(true);
+  const installUpdateMutation = useDownloadAndInstallUpdate();
 
   // Initialize Tauri drag and drop
   const { isDragOver } = useOnDragDropEvent(
@@ -240,6 +244,29 @@ export function MainWindow() {
     toast.success("Pandoc installed successfully!");
   };
 
+  const handleInstallUpdate = async () => {
+    if (!updateResult?.shouldUpdate) return;
+    
+    const toastId = toast.loading("Installing update...", {
+      description: "The app will restart after installation.",
+    });
+
+    installUpdateMutation.mutate(undefined, {
+      onSuccess: () => {
+        toast.dismiss(toastId);
+        toast.success("Update installed!", {
+          description: "The application will restart now.",
+        });
+      },
+      onError: (error) => {
+        toast.dismiss(toastId);
+        toast.error("Update failed", {
+          description: error instanceof Error ? error.message : "Unknown error occurred.",
+        });
+      },
+    });
+  };
+
   const fileName = useMemo(() => {
     if (!selectedFile) return "";
     return selectedFile.split("/").pop() || selectedFile;
@@ -272,7 +299,35 @@ export function MainWindow() {
 
       <div className="h-screen flex items-center justify-center">
         <div className="fixed top-0 right-0 left-0 px-3 z-50" data-tauri-drag-region>
-          <div className="flex items-end justify-end py-2" data-tauri-drag-region>
+          <div className="flex items-end justify-end py-2 gap-2" data-tauri-drag-region>
+            {updateResult?.shouldUpdate && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    onClick={handleInstallUpdate}
+                    disabled={installUpdateMutation.isPending}
+                    variant="ghost" 
+                    size="sm" 
+                    className="hover:bg-blue-500/20 hover:text-blue-600 inline-flex items-center gap-1"
+                  >
+                    {installUpdateMutation.isPending ? (
+                      <Loader2Icon className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <div className="text-center">
+                    <div className="font-medium">Update Available</div>
+                    <div className="text-xs text-muted-foreground">
+                      v{updateResult.manifest?.version}
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            )}
+            
             <Button onClick={_ => {
               invoke("open_settings_window");
             }} variant="ghost" size="sm" className="hover:bg-foreground/20 hover:text-foreground">

@@ -10,6 +10,10 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
         .setup(|app| {
+            // Initialize updater plugin on desktop platforms
+            #[cfg(desktop)]
+            app.handle().plugin(tauri_plugin_updater::Builder::new().build())?;
+
             // Create the main window programmatically with traffic lights only
             let win_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
                 .title("") // Empty title to hide title text
