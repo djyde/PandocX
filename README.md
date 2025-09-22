@@ -14,6 +14,14 @@ File converter. Based on [Pandoc](https://pandoc.org/).
 
 Download the latest version from the [releases page](https://github.com/djyde/PandocX/releases).
 
+## Development
+
+```bash
+pnpm i
+
+pnpm tauri dev
+```
+
 # License
 
 AGPL-3.0
