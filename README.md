@@ -1,7 +1,13 @@
-# Tauri + React + Typescript
+# PandocX
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+File converter. Based on [Pandoc](https://pandoc.org/).
 
-## Recommended IDE Setup
+## Features
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+- Convert files between any Pandoc-supported formats
+- Automatically download Pandoc if it's not installed
+- Cross platform (Not tested on Windows/Linux yet)
+
+# License
+
+AGPL-3.0
