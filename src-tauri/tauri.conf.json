@@ -14,14 +14,17 @@
       {
         "label": "main",
         "title": "pandocx",
-        "width": 800,
-        "height": 600
+        "width": 640,
+        "height": 480,
+        "maximizable": false,
+        "minimizable": false,
+        "center": true
       },
       {
         "label": "settings",
-        "title": "Settings - pandocx",
+        "title": "Settings",
         "width": 600,
-        "height": 500,
+        "height": 300,
         "url": "settings.html",
         "visible": false,
         "resizable": false,
