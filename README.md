@@ -2,6 +2,8 @@
 
 File converter. Based on [Pandoc](https://pandoc.org/).
 
+![PandocX](./screenshot.png)
+
 ## Features
 
 - Convert files between any Pandoc-supported formats
