@@ -188,7 +188,7 @@ pub async fn open_in_finder(path: String) -> Result<(), String> {
 #[tauri::command]
 pub async fn open_settings_window(app: tauri::AppHandle) -> Result<(), String> {
     if let Some(settings_window) = app.get_webview_window("settings") {
-        // If window already exists, just show and focus it
+        // Window exists (either visible or hidden), just show and focus it
         settings_window.show().map_err(|e| e.to_string())?;
         settings_window.set_focus().map_err(|e| e.to_string())?;
     } else {
@@ -202,6 +202,19 @@ pub async fn open_settings_window(app: tauri::AppHandle) -> Result<(), String> {
 pub async fn close_settings_window(app: tauri::AppHandle) -> Result<(), String> {
     if let Some(settings_window) = app.get_webview_window("settings") {
         settings_window.hide().map_err(|e| e.to_string())?;
+    }
+    
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn open_main_window(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(main_window) = app.get_webview_window("main") {
+        // Window exists (either visible or hidden), just show and focus it
+        main_window.show().map_err(|e| e.to_string())?;
+        main_window.set_focus().map_err(|e| e.to_string())?;
+    } else {
+        return Err("Main window not found".to_string());
     }
     
     Ok(())

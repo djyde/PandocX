@@ -56,6 +56,14 @@ export function SettingsWindow() {
     }
   };
 
+  const handleOpenMain = async () => {
+    try {
+      await invoke("open_main_window");
+    } catch (error) {
+      console.error("Failed to open main window:", error);
+    }
+  };
+
   const getStatusColor = () => {
     if (validationError) return "text-red-600";
     if (isValidPath === true) return "text-green-600";
@@ -115,12 +123,20 @@ export function SettingsWindow() {
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
         <h1 className="text-xl font-semibold text-gray-900">Settings</h1>
-        <button
-          onClick={handleClose}
-          className="text-gray-400 hover:text-gray-600 text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
-        >
-          ×
-        </button>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={handleOpenMain}
+            className="text-gray-500 hover:text-gray-700 text-sm font-medium px-3 py-1 rounded-md hover:bg-gray-100"
+          >
+            Open Main Window
+          </button>
+          <button
+            onClick={handleClose}
+            className="text-gray-400 hover:text-gray-600 text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+          >
+            ×
+          </button>
+        </div>
       </div>
 
       {/* Content */}

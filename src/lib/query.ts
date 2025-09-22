@@ -107,3 +107,27 @@ export const useValidatePandocPath = () => {
     },
   });
 };
+
+// Document conversion
+interface ConversionParams {
+  pandocPath: string;
+  inputPath: string;
+  outputFormat: string;
+  [key: string]: unknown;
+}
+
+interface ConversionResult {
+  success: boolean;
+  output_path?: string;
+  error?: string;
+}
+
+export const convertDocument = async (params: ConversionParams): Promise<ConversionResult> => {
+  return await invoke<ConversionResult>("convert_document", params);
+};
+
+export const useConvertDocument = () => {
+  return useMutation({
+    mutationFn: convertDocument,
+  });
+};
