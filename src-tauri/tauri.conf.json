@@ -43,9 +43,9 @@
   "plugins": {
     "updater": {
       "endpoints": [
-        "https://github.com/djyde/PandocX/releases/latest/download/{{target}}-{{arch}}.json"
+        "https://github.com/djyde/PandocX/releases/latest/download/latest.json"
       ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEJGRTBGQjEzODQ2MzUxMTMKUldRVFVXT0VFL3ZndjVvNmRYMGNLSmZhNHlzSThyTlk2d0lUYmZiMDZVeXpxK29OQUYybmhiSzcK"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlEOEIzM0JGRjM1MjIyNTgKUldSWUlsTHp2ek9MbmVoa3cxWjJ3VmZUT2FrbkpEaE5VNmJ3VVR5UDJ6d3JrOHVmcDlQdkw1YXcK"
     }
   }
 }
