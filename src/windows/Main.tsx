@@ -1,14 +1,16 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
+import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { usePandocPath, useConvertDocument } from "../lib/query";
 import { toast } from "sonner";
 import { PandocDownloadDialog } from "@/components/PandocDownloadDialog";
 
-import { FileTextIcon, Loader2Icon, PlusIcon, SettingsIcon } from 'lucide-react'
+import { ExternalLinkIcon, FileTextIcon, FolderOpenIcon, Loader2Icon, PlusIcon, SettingsIcon } from 'lucide-react'
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useQuery } from "@tanstack/react-query";
 
 
 
@@ -79,12 +81,81 @@ const inputExtensions = [
 ]
 
 
+const useOnDragDropEvent = (onFileDrop: (filePath: string) => void, acceptedExtensions: string[]) => {
+  const listenedRef = useRef(false);
+
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const validateFilePath = useCallback((filePath: string) => {
+    const extension = filePath.split('.').pop()?.toLowerCase();
+    return extension && acceptedExtensions.includes(extension);
+  }, [acceptedExtensions]);
+
+  useQuery({
+    queryKey: ["on-drag-drop-event", "main"],
+    queryFn: async () => {
+      console.log("on-drag-drop-event", "main");
+      if (listenedRef.current) {
+        return {
+          unlisten: () => { },
+        };
+      }
+      listenedRef.current = true;
+      const webview = await getCurrentWebview();
+      console.log("webview", webview);
+      const unlisten = webview.onDragDropEvent((event) => {
+        const payload = event.payload;
+
+        if (payload.type === 'enter' || payload.type === 'over') {
+          setIsDragOver(true);
+        } else if (payload.type === 'drop') {
+          setIsDragOver(false);
+
+          if (payload.paths && payload.paths.length > 0) {
+            const filePath = payload.paths[0];
+
+            if (!validateFilePath(filePath)) {
+              const extension = filePath.split('.').pop()?.toLowerCase();
+              toast.error(`Unsupported file format "${extension}". Supported formats: ${acceptedExtensions.join(', ')}`);
+              return;
+            }
+
+            onFileDrop(filePath);
+          }
+        } else if (payload.type === 'leave') {
+          setIsDragOver(false);
+        }
+      });
+
+      return {
+        unlisten,
+      }
+    },
+    throwOnError: true,
+    retry: false,
+  })
+
+  return {
+    isDragOver,
+  }
+}
+
+
+
 export function MainWindow() {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [showDownloadDialog, setShowDownloadDialog] = useState(false);
 
   const { data: pandocPath, isLoading: pandocLoading, refetch: refetchPandocPath } = usePandocPath();
   const convertMutation = useConvertDocument();
+
+  // Initialize Tauri drag and drop
+  const { isDragOver } = useOnDragDropEvent(
+    (filePath: string) => {
+      setSelectedFile(filePath);
+    },
+    inputExtensions
+  );
 
   const handleFileSelect = async () => {
     try {
@@ -129,7 +200,10 @@ export function MainWindow() {
           toast.success("Conversion completed!", {
             duration: Infinity,
             action: {
-              label: "Open Folder",
+              label: <div className="flex items-center gap-1">
+                <FolderOpenIcon size={12} />
+                Open in folder
+              </div>,
               onClick: () => {
                 invoke("open_in_finder", { path: result.output_path });
               }
@@ -189,6 +263,12 @@ export function MainWindow() {
 
   return (
     <>
+      {/* Full-window drag overlay */}
+      {isDragOver && (
+        <div className="fixed inset-0 bg-primary/20 z-50 flex items-center justify-center border-2 border-primary border-dashed">
+
+        </div>
+      )}
 
       <div className="h-screen flex items-center justify-center">
         <div className="fixed top-0 right-0 left-0 px-3">
@@ -203,14 +283,18 @@ export function MainWindow() {
         <div className="flex flex-col gap-4 items-center">
           <Tooltip>
             <TooltipTrigger>
-              <div onClick={_ => {
-                handleFileSelect();
-              }} role="button" className="w-18 h-18 border-primary border-2 border-dashed flex items-center justify-center rounded-lg hover:border-primary/80 transition-all duration-100">
+              <div
+                onClick={_ => {
+                  handleFileSelect();
+                }}
+                role="button"
+                className="w-18 h-18 border-primary border-2 border-dashed flex items-center justify-center rounded-lg transition-all duration-200 hover:border-primary/80 hover:bg-primary/5"
+              >
                 <PlusIcon />
               </div>
             </TooltipTrigger>
             <TooltipContent className="max-w-64">
-              Support formats: {inputExtensions.join(", ")}
+              Click to select or drag & drop anywhere. Support formats: {inputExtensions.join(", ")}
             </TooltipContent>
           </Tooltip>
 
