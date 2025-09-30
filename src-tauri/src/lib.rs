@@ -1,6 +1,6 @@
 mod commands;
 
-use tauri::{Manager, TitleBarStyle, WebviewUrl, WebviewWindowBuilder};
+use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -25,7 +25,7 @@ pub fn run() {
 
             // Set overlay title bar style for traffic lights only on macOS
             #[cfg(target_os = "macos")]
-            let win_builder = win_builder.title_bar_style(TitleBarStyle::Overlay);
+            let win_builder = win_builder.title_bar_style(tauri::TitleBarStyle::Overlay);
 
             let _window = win_builder.build()?;
 
@@ -61,6 +61,7 @@ pub fn run() {
         .expect("error while building tauri application")
         .run(|app_handle, event| {
             match event {
+                #[cfg(target_os = "macos")]
                 tauri::RunEvent::Reopen { .. } => {
                     // Handle dock icon click on macOS
                     if let Some(main_window) = app_handle.get_webview_window("main") {
